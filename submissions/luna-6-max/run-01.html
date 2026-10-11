@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070c">
+  <title>Event Horizon — A Black Hole Field Study</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #edf0f5;
+      --muted: #8992a1;
+      --line: rgba(200, 216, 235, .13);
+      --panel: rgba(7, 10, 16, .70);
+      --accent: #ffbf78;
+      --cyan: #84d7e9;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #05070c; }
+    body { color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    #universe { position: fixed; inset: 0; width: 100%; height: 100%; display: block; background: radial-gradient(ellipse at 49% 48%, #101522 0, #080b12 40%, #04060a 100%); }
+    .vignette { position: fixed; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(3,5,9,.60) 0, rgba(3,5,9,.32) 23%, transparent 49%), radial-gradient(ellipse at 50% 46%, transparent 36%, rgba(2, 3, 6, .40) 100%); }
+    .grain { position: fixed; inset: 0; pointer-events: none; opacity: .09; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E"); mix-blend-mode: screen; }
+    .topbar { position: fixed; inset: 0 0 auto; height: 78px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 4.4vw, 72px); border-bottom: 1px solid rgba(255,255,255,.055); z-index: 2; }
+    .brand { display: flex; align-items: center; gap: 12px; letter-spacing: .16em; font-size: 10px; color: #d8dce5; text-transform: uppercase; font-weight: 600; }
+    .brand-mark { width: 22px; height: 22px; position: relative; border: 1px solid rgba(239,244,255,.52); border-radius: 50%; display: grid; place-items: center; }
+    .brand-mark::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #030407; box-shadow: 0 0 8px 3px rgba(255,176,94,.5); }
+    .brand-mark::after { content: ""; position: absolute; width: 28px; height: 9px; border: 1px solid rgba(255,195,128,.75); border-radius: 50%; transform: rotate(-21deg); }
+    .status { display: flex; align-items: center; gap: 9px; color: #aeb6c2; font-size: 9px; letter-spacing: .18em; text-transform: uppercase; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #9cdbbb; box-shadow: 0 0 10px rgba(143,238,185,.75); animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .38; } }
+    .intro { position: fixed; z-index: 1; top: clamp(116px, 17vh, 184px); left: clamp(24px, 8.4vw, 138px); width: min(390px, 37vw); pointer-events: none; text-shadow: 0 2px 24px #05070c; }
+    .eyebrow { color: var(--accent); font-size: 9px; line-height: 1.4; letter-spacing: .25em; text-transform: uppercase; font-weight: 650; }
+    h1 { margin: 17px 0 14px; font-size: clamp(38px, 5.4vw, 76px); letter-spacing: -.065em; line-height: .91; font-weight: 360; text-transform: uppercase; }
+    h1 span { color: rgba(237,240,245,.68); font-weight: 270; }
+    .intro p { max-width: 330px; margin: 0; color: #a2aab7; font-size: 12px; line-height: 1.75; letter-spacing: .015em; }
+    .intro .rule { width: 36px; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); margin: 21px 0 13px; }
+    .caption { display: flex; align-items: center; gap: 8px; color: #8f98a7; text-transform: uppercase; font-size: 8px; letter-spacing: .19em; }
+    .caption b { color: #e3e7ee; font-weight: 500; }
+    .panel { position: fixed; z-index: 3; right: clamp(20px, 5.4vw, 88px); bottom: clamp(24px, 6vh, 64px); width: min(292px, calc(100vw - 40px)); padding: 20px 21px 17px; border: 1px solid var(--line); background: linear-gradient(145deg, rgba(14,18,27,.83), var(--panel)); backdrop-filter: blur(18px); box-shadow: 0 18px 60px rgba(0,0,0,.26); }
+    .panel-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 15px; border-bottom: 1px solid var(--line); }
+    .panel h2 { margin: 0; font-size: 9px; letter-spacing: .21em; text-transform: uppercase; font-weight: 600; }
+    .panel-index { color: #778292; font-size: 9px; letter-spacing: .12em; }
+    .control { padding-top: 16px; }
+    .control-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .control label { color: #aeb6c2; font-size: 10px; letter-spacing: .035em; }
+    output { color: #e7ebf2; font-size: 10px; font-variant-numeric: tabular-nums; }
+    input[type=range] { appearance: none; width: 100%; height: 14px; margin: 0; background: transparent; cursor: ew-resize; }
+    input[type=range]::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, rgba(255,191,120,.68), rgba(255,255,255,.18)); }
+    input[type=range]::-moz-range-track { height: 2px; background: linear-gradient(90deg, rgba(255,191,120,.68), rgba(255,255,255,.18)); }
+    input[type=range]::-webkit-slider-thumb { appearance: none; width: 9px; height: 9px; margin-top: -3.5px; border: 1px solid #fff1df; border-radius: 50%; background: #f5bf83; box-shadow: 0 0 10px rgba(245,191,131,.6); }
+    input[type=range]::-moz-range-thumb { width: 8px; height: 8px; border: 1px solid #fff1df; border-radius: 50%; background: #f5bf83; box-shadow: 0 0 10px rgba(245,191,131,.6); }
+    .actions { display: flex; gap: 8px; margin-top: 19px; }
+    button { flex: 1; height: 34px; color: #d4d9e1; background: rgba(255,255,255,.045); border: 1px solid rgba(220,230,245,.13); font: inherit; font-size: 9px; letter-spacing: .11em; text-transform: uppercase; cursor: pointer; transition: background .2s, border-color .2s, color .2s; }
+    button:hover, button:focus-visible { outline: none; color: white; border-color: rgba(255,191,120,.58); background: rgba(255,191,120,.10); }
+    button.primary { color: #ffd09c; border-color: rgba(255,191,120,.36); }
+    .panel-note { margin: 14px 0 0; color: #747e8c; font-size: 8px; line-height: 1.55; letter-spacing: .035em; }
+    .readouts { position: fixed; z-index: 2; bottom: clamp(28px, 6vh, 68px); left: clamp(24px, 8.4vw, 138px); display: flex; gap: clamp(22px, 4.6vw, 64px); }
+    .readout { display: grid; gap: 7px; }
+    .readout span { color: #788392; font-size: 8px; text-transform: uppercase; letter-spacing: .18em; }
+    .readout strong { color: #dce1e9; font-size: 10px; font-weight: 450; letter-spacing: .06em; }
+    .readout strong em { color: var(--accent); font-style: normal; }
+    .crosshair { position: fixed; z-index: 1; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%, -50%); pointer-events: none; opacity: .27; }
+    .crosshair::before, .crosshair::after { content: ""; position: absolute; background: #c9d1dc; }
+    .crosshair::before { left: 8px; top: 0; width: 1px; height: 18px; }
+    .crosshair::after { top: 8px; left: 0; width: 18px; height: 1px; }
+    #error { display: none; position: fixed; z-index: 8; inset: auto 20px 20px; padding: 13px 16px; background: #351d20; border: 1px solid #a45c56; color: #ffe2dc; font-size: 12px; }
+    @media (max-width: 760px) {
+      .topbar { height: 62px; }
+      .status { font-size: 7px; letter-spacing: .12em; }
+      .intro { top: 94px; left: 23px; width: min(340px, 76vw); }
+      h1 { font-size: clamp(38px, 12vw, 62px); margin: 13px 0 10px; }
+      .intro p { max-width: 275px; font-size: 10px; }
+      .intro .rule { margin: 14px 0 9px; }
+      .panel { right: 16px; bottom: 16px; width: min(255px, calc(100vw - 32px)); padding: 16px; }
+      .control { padding-top: 12px; }
+      .actions { margin-top: 14px; }
+      .readouts { display: none; }
+      .crosshair { top: 54%; }
+    }
+    @media (max-width: 430px) {
+      .intro { top: 82px; width: 78vw; }
+      .intro p { max-width: 240px; }
+      .panel { right: 16px; bottom: 12px; width: min(280px, calc(100vw - 32px)); padding: 14px; }
+      .panel-note { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <canvas id="universe" aria-label="Animated gravitational lensing around a black hole"></canvas>
+  <div class="vignette"></div><div class="grain"></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Deep field observatory</span></div>
+    <div class="status"><span class="status-dot"></span><span id="statusText">Relativistic field · live</span></div>
+  </header>
+  <main class="intro">
+    <div class="eyebrow">Field study 01 &nbsp; / &nbsp; gravity</div>
+    <h1>Event<br><span>horizon</span></h1>
+    <p>Light takes the long way around. A warped starfield reveals the invisible mass at the center of this accretion flow.</p>
+    <div class="rule"></div>
+    <div class="caption"><b>Schwarzschild field</b><span>•</span><span>live ray trace</span></div>
+  </main>
+  <div class="crosshair" aria-hidden="true"></div>
+  <section class="readouts" aria-label="Simulation reference values">
+    <div class="readout"><span>Horizon radius</span><strong><em>1.00</em> rₛ</strong></div>
+    <div class="readout"><span>Photon sphere</span><strong>1.50 rₛ</strong></div>
+    <div class="readout"><span>Disk span</span><strong>1.45 — 6.80 rₛ</strong></div>
+  </section>
+  <aside class="panel" aria-label="Simulation controls">
+    <div class="panel-head"><h2>Observatory controls</h2><span class="panel-index">01 / 03</span></div>
+    <div class="control">
+      <div class="control-top"><label for="gravity">Space-time curvature</label><output id="gravityValue">1.00×</output></div>
+      <input id="gravity" type="range" min="0.65" max="1.35" step="0.01" value="1" aria-label="Space-time curvature">
+    </div>
+    <div class="control">
+      <div class="control-top"><label for="inclination">Viewing angle</label><output id="inclinationValue">74°</output></div>
+      <input id="inclination" type="range" min="62" max="84" step="1" value="74" aria-label="Viewing angle">
+    </div>
+    <div class="control">
+      <div class="control-top"><label for="flow">Accretion flow</label><output id="flowValue">1.0×</output></div>
+      <input id="flow" type="range" min="0" max="2" step="0.1" value="1" aria-label="Accretion flow speed">
+    </div>
+    <div class="actions"><button class="primary" id="pause" type="button">Pause field</button><button id="reset" type="button">Reset view</button></div>
+    <p class="panel-note">Stylized Schwarzschild ray integration. The disk's brighter side shows relativistic Doppler beaming.</p>
+  </aside>
+  <div id="error" role="alert"></div>
+
+  <script>
+  (() => {
+    'use strict';
+    const canvas = document.getElementById('universe');
+    const errorBox = document.getElementById('error');
+    const vertexSource = `#version 300 es
+      in vec2 position;
+      void main(){ gl_Position=vec4(position,0.0,1.0); }
+    `;
+    const fragmentSource = `#version 300 es
+      precision highp float;
+      uniform vec2 uResolution;
+      uniform float uTime;
+      uniform float uLens;
+      uniform float uIncline;
+      uniform float uZoom;
+      out vec4 color;
+
+      const float RS = 0.72;
+      const float PI = 3.14159265359;
+      float hash21(vec2 p) {
+        p = fract(p * vec2(123.34, 456.21));
+        p += dot(p, p + 45.32);
+        return fract(p.x * p.y);
+      }
+      float noise2(vec2 p) {
+        vec2 i = floor(p), f = fract(p);
+        f = f*f*(3.0-2.0*f);
+        return mix(mix(hash21(i), hash21(i+vec2(1.0,0.0)), f.x),
+                   mix(hash21(i+vec2(0.0,1.0)), hash21(i+vec2(1.0,1.0)), f.x), f.y);
+      }
+      vec3 sky(vec3 d) {
+        vec2 uv = vec2(atan(d.x,d.z)/(2.0*PI)+0.5, asin(clamp(d.y,-1.0,1.0))/PI+0.5);
+        vec2 neb = uv * vec2(7.0, 4.0);
+        float cloud = noise2(neb) * 0.60 + noise2(neb*2.2+4.1) * 0.28 + noise2(neb*4.7+2.6) * 0.12;
+        float lane = smoothstep(0.18,0.85, cloud) * smoothstep(-0.06,0.14, d.y + 0.20*sin(d.x*5.0));
+        vec3 base = vec3(0.012,0.018,0.032) + lane*vec3(0.034,0.027,0.055);
+        vec2 g = uv * vec2(430.0, 215.0);
+        vec2 cell = floor(g);
+        float stars = 0.0;
+        vec3 starTint = vec3(0.0);
+        for (int y=-1; y<=1; y++) {
+          for (int x=-1; x<=1; x++) {
+            vec2 c = cell + vec2(float(x),float(y));
+            float h = hash21(c);
+            if (h > 0.82) {
+              vec2 offset = vec2(hash21(c+8.3), hash21(c+19.7));
+              float dist = length((g-c-offset));
+              float size = mix(0.045, 0.17, hash21(c+39.2));
+              float s = 1.0-smoothstep(size, size+0.045, dist);
+              float twinkle = 0.82 + 0.18*sin(uTime*0.7 + h*31.0);
+              vec3 tint = mix(vec3(0.64,0.77,1.0), vec3(1.0,0.76,0.52), hash21(c+71.0));
+              starTint += tint * s * twinkle * mix(0.45,1.65,hash21(c+14.0));
+              stars += s;
+            }
+          }
+        }
+        return base + lane*lane*vec3(0.025,0.016,0.045) + starTint + stars*stars*vec3(0.12,0.16,0.24);
+      }
+      vec3 diskEmission(vec3 p, vec3 ray) {
+        float r = length(p.xz);
+        float inner = 1.45*RS;
+        float outer = 6.80*RS;
+        float edge = smoothstep(inner, inner+0.16*RS, r) * (1.0-smoothstep(outer-0.35*RS, outer, r));
+        float radial = clamp((r-inner)/(outer-inner),0.0,1.0);
+        float phi = atan(p.z,p.x);
+        float n = noise2(vec2(phi*3.5 + log(max(r,0.01))*4.0, r*3.4 - uTime*0.045));
+        float broad = 0.5 + 0.5*sin(phi*9.0 + log(max(r,0.01))*12.0 - uTime*0.13 + n*2.2);
+        float filaments = pow(0.5+0.5*sin(phi*31.0 + log(max(r,0.01))*22.0 - uTime*0.19 + n*4.0), 7.0);
+        float turbulence = 0.52 + 0.35*broad + 0.48*filaments + 0.2*n;
+        float temperature = 1.0-smoothstep(0.0,0.88,radial);
+        vec3 hot = vec3(1.22,0.88,0.56);
+        vec3 cool = vec3(0.88,0.22,0.055);
+        vec3 emitted = mix(cool, hot, pow(temperature,0.75));
+        vec3 tangent = normalize(vec3(-p.z,0.0,p.x));
+        vec3 toCamera = normalize(-ray);
+        float doppler = pow(clamp(1.0 + 0.62*dot(tangent,toCamera),0.32,1.72),2.45);
+        float innerHeat = 1.0 + 0.7*pow(max(0.0,1.0-radial),2.0);
+        return emitted * edge * turbulence * doppler * innerHeat * 2.0;
+      }
+      void main() {
+        vec2 screen = (gl_FragCoord.xy/uResolution)*2.0-1.0;
+        screen.x *= uResolution.x/uResolution.y;
+        screen *= uZoom;
+        float inclination = radians(uIncline);
+        vec3 camera = vec3(0.0, cos(inclination)*11.0, sin(inclination)*11.0);
+        vec3 forward = normalize(-camera);
+        vec3 right = normalize(cross(forward,vec3(0.0,1.0,0.0)));
+        vec3 up = normalize(cross(right,forward));
+        vec3 ray = normalize(forward + right*screen.x*0.325 + up*screen.y*0.325);
+        vec3 p = camera;
+        float closest = 100.0;
+        float ds = 0.073;
+        bool captured = false;
+        bool hitDisk = false;
+        vec3 diskPoint = vec3(0.0);
+        vec3 rayDir = ray;
+        for (int i=0; i<260; i++) {
+          float r = length(p);
+          closest = min(closest,r);
+          if (r < RS*1.005) { captured=true; break; }
+          if (i>10 && r>12.2 && dot(p,rayDir)>0.0) break;
+          vec3 old = p;
+          vec3 perp = p - rayDir*dot(p,rayDir);
+          float bend = uLens*RS/(max(r,RS*0.73)*max(r,RS*0.73)*max(r,RS*0.73));
+          rayDir = normalize(rayDir - bend*perp*ds);
+          p += rayDir*ds;
+          if (old.y*p.y <= 0.0 && abs(old.y-p.y)>0.0001) {
+            float t = clamp(old.y/(old.y-p.y),0.0,1.0);
+            vec3 crossPoint = mix(old,p,t);
+            float diskR = length(crossPoint.xz);
+            if (diskR > 1.45*RS && diskR < 6.80*RS) {
+              hitDisk=true; diskPoint=crossPoint; break;
+            }
+          }
+        }
+        vec3 scene;
+        if (captured) {
+          scene=vec3(0.001,0.0015,0.003);
+        } else if (hitDisk) {
+          scene=diskEmission(diskPoint,rayDir);
+        } else {
+          scene=sky(rayDir);
+          float photon = exp(-pow((closest/RS-1.48)*13.0,2.0));
+          float halo = exp(-pow((closest/RS-1.85)*2.1,2.0));
+          scene += photon*vec3(0.92,0.72,0.49)*0.22;
+          scene += halo*vec3(0.54,0.22,0.095)*0.07;
+        }
+        float vignette = 1.0 - 0.18*smoothstep(0.5,1.8,length(screen));
+        scene *= vignette;
+        scene = vec3(1.0)-exp(-scene*1.05);
+        color=vec4(scene,1.0);
+      }
+    `;
+
+    const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, powerPreference: 'high-performance' });
+    if (!gl) {
+      errorBox.style.display = 'block';
+      errorBox.textContent = 'This simulation needs WebGL 2. Try opening it in an up-to-date browser with hardware acceleration enabled.';
+      return;
+    }
+    function compile(type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader) || 'Shader compilation failed.');
+      return shader;
+    }
+    try {
+      const program = gl.createProgram();
+      gl.attachShader(program, compile(gl.VERTEX_SHADER, vertexSource));
+      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragmentSource));
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) || 'Program link failed.');
+      gl.useProgram(program);
+      const vertices = new Float32Array([-1,-1, 3,-1, -1,3]);
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+      const position = gl.getAttribLocation(program,'position');
+      gl.enableVertexAttribArray(position);
+      gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+      const uniforms = Object.fromEntries(['uResolution','uTime','uLens','uIncline','uZoom'].map(name => [name,gl.getUniformLocation(program,name)]));
+      const controls = {
+        gravity: document.getElementById('gravity'),
+        inclination: document.getElementById('inclination'),
+        flow: document.getElementById('flow')
+      };
+      const outputs = {
+        gravity: document.getElementById('gravityValue'),
+        inclination: document.getElementById('inclinationValue'),
+        flow: document.getElementById('flowValue')
+      };
+      function syncLabels() {
+        outputs.gravity.value = Number(controls.gravity.value).toFixed(2)+'×';
+        outputs.inclination.value = controls.inclination.value+'°';
+        outputs.flow.value = Number(controls.flow.value).toFixed(1)+'×';
+      }
+      Object.values(controls).forEach(input => input.addEventListener('input',syncLabels));
+      let paused=false, clock=0, previous=performance.now();
+      const pauseButton=document.getElementById('pause');
+      pauseButton.addEventListener('click',()=>{
+        paused=!paused;
+        pauseButton.textContent=paused?'Resume field':'Pause field';
+        document.getElementById('statusText').textContent=paused?'Relativistic field · paused':'Relativistic field · live';
+        previous=performance.now();
+      });
+      document.getElementById('reset').addEventListener('click',()=>{
+        controls.gravity.value='1'; controls.inclination.value='74'; controls.flow.value='1';
+        syncLabels(); clock=0; previous=performance.now();
+      });
+      function resize() {
+        const dpr=Math.min(window.devicePixelRatio||1,1.6);
+        const width=Math.max(1,Math.floor(innerWidth*dpr));
+        const height=Math.max(1,Math.floor(innerHeight*dpr));
+        if (canvas.width!==width||canvas.height!==height) { canvas.width=width; canvas.height=height; gl.viewport(0,0,width,height); }
+      }
+      function frame(now) {
+        resize();
+        if (!paused) clock += Math.min((now-previous)/1000,0.06)*Number(controls.flow.value);
+        previous=now;
+        gl.uniform2f(uniforms.uResolution,canvas.width,canvas.height);
+        gl.uniform1f(uniforms.uTime,clock);
+        gl.uniform1f(uniforms.uLens,Number(controls.gravity.value));
+        gl.uniform1f(uniforms.uIncline,Number(controls.inclination.value));
+        const aspect=innerWidth/innerHeight;
+        gl.uniform1f(uniforms.uZoom,Math.max(1.15,1.84/aspect));
+        gl.drawArrays(gl.TRIANGLES,0,3);
+        requestAnimationFrame(frame);
+      }
+      syncLabels();
+      requestAnimationFrame(frame);
+    } catch (error) {
+      errorBox.style.display='block';
+      errorBox.textContent='The graphics shader could not start: '+error.message;
+      console.error(error);
+    }
+  })();
+  </script>
+</body>
+</html>
